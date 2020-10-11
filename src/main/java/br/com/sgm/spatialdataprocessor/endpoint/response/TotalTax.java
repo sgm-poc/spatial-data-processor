@@ -4,11 +4,12 @@ import java.math.BigDecimal;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 
 /**
  * Classe que representa o total de impostos
  */
-@AllArgsConstructor
+@Builder
 public class TotalTax {
 
     private static final String AMOUNT = "amount";

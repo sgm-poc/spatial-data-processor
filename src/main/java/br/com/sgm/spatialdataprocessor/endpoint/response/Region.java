@@ -2,11 +2,12 @@ package br.com.sgm.spatialdataprocessor.endpoint.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 
 /**
  * Classe que representa a região para resposta do endpoint
  */
-@AllArgsConstructor
+@Builder
 public class Region {
 
     private static final String CODE = "code";

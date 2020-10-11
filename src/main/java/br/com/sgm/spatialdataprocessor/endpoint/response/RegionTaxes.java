@@ -2,11 +2,12 @@ package br.com.sgm.spatialdataprocessor.endpoint.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 
 /**
  * Classe que representa os impostos da região
  */
-@AllArgsConstructor
+@Builder
 public class RegionTaxes {
 
     private static final String REGION = "region";

@@ -1,12 +1,18 @@
 package br.com.sgm.spatialdataprocessor.endpoint;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import br.com.sgm.spatialdataprocessor.endpoint.response.Region;
 import br.com.sgm.spatialdataprocessor.endpoint.response.RegionTaxes;
 import br.com.sgm.spatialdataprocessor.endpoint.response.TaxType;
 import br.com.sgm.spatialdataprocessor.endpoint.response.TotalTax;
+import br.com.sgm.spatialdataprocessor.service.SpatialDataService;
+import br.com.sgm.spatialdataprocessor.service.exception.RegionTaxesException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,22 +21,32 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Classe responsável por prover um endpoint para manipulação de regioẽs
  */
+@Slf4j
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/regions")
 public class RegionsEndpoint {
 
+    @Autowired
+    private SpatialDataService spatialDataService;
+
     @GetMapping("/{regionCode}")
-    public ResponseEntity<Region> getRegion(@PathVariable String regionCode) {
+    public ResponseEntity<Region> getRegion(@PathVariable String regionCode) throws RegionTaxesException {
 
+        log.info("getRegion:"+ LocalDateTime.now().toString());
 
-        return ResponseEntity.ok(new Region("code", "name", 500L));
+        final var region = spatialDataService.getRegion(regionCode);
+
+        return ResponseEntity.of(region);
     }
 
     @GetMapping("/{regionCode}/taxes")
-    public ResponseEntity<RegionTaxes> getRegionTaxes(@PathVariable String regionCode) {
+    public ResponseEntity<RegionTaxes> getRegionTaxes(@PathVariable String regionCode) throws RegionTaxesException {
+        log.info("getRegionTaxes:"+ LocalDateTime.now().toString());
 
+        final var region = spatialDataService.getRegionTaxes(regionCode);
 
-        return ResponseEntity.ok(new RegionTaxes (new Region("code", "name", 500L), new TotalTax(BigDecimal.TEN, TaxType.IPTU)));
+        return ResponseEntity.of(region);
     }
 
 }
