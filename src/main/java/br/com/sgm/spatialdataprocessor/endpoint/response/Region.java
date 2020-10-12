@@ -14,7 +14,7 @@ public class Region {
 
     private static final String NAME = "name";
 
-    private static final String HABITANTS = "habitants";
+    private static final String POPULATION = "population";
 
     @JsonProperty(CODE)
     private String code;
@@ -22,7 +22,7 @@ public class Region {
     @JsonProperty(NAME)
     private String name;
 
-    @JsonProperty(HABITANTS)
-    private Long habitants;
+    @JsonProperty(POPULATION)
+    private Long population;
 
 }

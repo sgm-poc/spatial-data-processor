@@ -1,12 +1,10 @@
 package br.com.sgm.spatialdataprocessor.endpoint;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import br.com.sgm.spatialdataprocessor.endpoint.response.Region;
+import br.com.sgm.spatialdataprocessor.endpoint.response.RegionList;
 import br.com.sgm.spatialdataprocessor.endpoint.response.RegionTaxes;
-import br.com.sgm.spatialdataprocessor.endpoint.response.TaxType;
-import br.com.sgm.spatialdataprocessor.endpoint.response.TotalTax;
 import br.com.sgm.spatialdataprocessor.service.SpatialDataService;
 import br.com.sgm.spatialdataprocessor.service.exception.RegionTaxesException;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +36,16 @@ public class RegionsEndpoint {
         final var region = spatialDataService.getRegion(regionCode);
 
         return ResponseEntity.of(region);
+    }
+
+    @GetMapping("")
+    public ResponseEntity<RegionList> getRegionList() throws RegionTaxesException {
+
+        log.info("getRegionList:"+ LocalDateTime.now().toString());
+
+        final var regionList = spatialDataService.getRegionList();
+
+        return ResponseEntity.of(regionList);
     }
 
     @GetMapping("/{regionCode}/taxes")

@@ -1,17 +1,19 @@
 package br.com.sgm.spatialdataprocessor.service;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import br.com.sgm.spatialdataprocessor.client.SturClient;
 import br.com.sgm.spatialdataprocessor.client.exception.ApiCallException;
 import br.com.sgm.spatialdataprocessor.client.exception.ParsingException;
 import br.com.sgm.spatialdataprocessor.client.response.Taxes;
 import br.com.sgm.spatialdataprocessor.endpoint.response.Region;
+import br.com.sgm.spatialdataprocessor.endpoint.response.RegionList;
 import br.com.sgm.spatialdataprocessor.endpoint.response.RegionTaxes;
 import br.com.sgm.spatialdataprocessor.endpoint.response.TaxType;
 import br.com.sgm.spatialdataprocessor.endpoint.response.TotalTax;
+import br.com.sgm.spatialdataprocessor.service.data.RegionData;
 import br.com.sgm.spatialdataprocessor.service.exception.RegionTaxesException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +39,7 @@ public class SpatialDataService {
         try {
             taxes = sturClient.getDataFromStur();
         } catch (ApiCallException | ParsingException e) {
-            e.printStackTrace();
+            log.error("Erro ao obter dados do STUR", e);
             throw new RegionTaxesException(e);
         }
 
@@ -49,8 +51,35 @@ public class SpatialDataService {
         }
 
         //TODO obter dados adicionais da região por outro serviço externo
+        final var data = RegionData.valueOf(filteredTax.get().getRegionCode());
+
         return Optional
-                .of(Region.builder().code(filteredTax.get().getRegionCode()).name("CENTRO").habitants(100L).build());
+                .of(Region.builder().code(data.getCode()).name(data.getName()).population(data.getPopulation()).build());
+    }
+
+    public Optional<RegionList> getRegionList() throws RegionTaxesException {
+
+        final List<Taxes> taxes;
+        try {
+            taxes = sturClient.getDataFromStur();
+        } catch (ApiCallException | ParsingException e) {
+            log.error("Erro ao obter dados do STUR", e);
+            throw new RegionTaxesException(e);
+        }
+
+        if (taxes.isEmpty()) {
+            return Optional.empty();
+        }
+
+        //TODO obter dados adicionais da região por outro serviço externo
+        final var regionList = taxes.stream()
+                .map(tax -> {
+                    final var data = RegionData.valueOf(tax.getRegionCode());
+                    return Region.builder().code(data.getCode()).name(data.getName()).population(data.getPopulation()).build();
+                })
+                .collect(Collectors.toList());
+
+        return Optional.of(RegionList.builder().regionList(regionList).build());
     }
 
     public Optional<RegionTaxes> getRegionTaxes(final String regionCode) throws RegionTaxesException {
@@ -59,7 +88,7 @@ public class SpatialDataService {
         try {
             taxes = sturClient.getDataFromStur();
         } catch (ApiCallException | ParsingException e) {
-            e.printStackTrace();
+            log.error("Erro ao obter dados do STUR", e);
             throw new RegionTaxesException(e);
         }
 
@@ -71,8 +100,10 @@ public class SpatialDataService {
         }
 
         //TODO obter dados adicionais da região por outro serviço externo
-        final var region = Region.builder().code(filteredTax.get().getRegionCode()).name("CENTRO").habitants(100L).build();
-        final var totalTax = TotalTax.builder().amount(filteredTax.get().getAmount()).type(TaxType.IPTU).build();
+        final var data = RegionData.valueOf(filteredTax.get().getRegionCode());
+
+        final var region = Region.builder().code(data.getCode()).name(data.getName()).population(data.getPopulation()).build();
+        final var totalTax = TotalTax.builder().amount(filteredTax.get().getAmount()).type(data.getTaxType()).build();
 
         final var regionTaxes = RegionTaxes.builder().region(region).taxes(totalTax).build();
 
