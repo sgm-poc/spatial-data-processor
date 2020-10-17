@@ -1,5 +1,6 @@
 package br.com.sgm.spatialdataprocessor.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -8,10 +9,10 @@ import br.com.sgm.spatialdataprocessor.client.SturClient;
 import br.com.sgm.spatialdataprocessor.client.exception.ApiCallException;
 import br.com.sgm.spatialdataprocessor.client.exception.ParsingException;
 import br.com.sgm.spatialdataprocessor.client.response.Taxes;
+import br.com.sgm.spatialdataprocessor.endpoint.response.County;
 import br.com.sgm.spatialdataprocessor.endpoint.response.Region;
 import br.com.sgm.spatialdataprocessor.endpoint.response.RegionList;
 import br.com.sgm.spatialdataprocessor.endpoint.response.RegionTaxes;
-import br.com.sgm.spatialdataprocessor.endpoint.response.TaxType;
 import br.com.sgm.spatialdataprocessor.endpoint.response.TotalTax;
 import br.com.sgm.spatialdataprocessor.service.data.RegionData;
 import br.com.sgm.spatialdataprocessor.service.exception.RegionTaxesException;
@@ -26,6 +27,8 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class SpatialDataService {
+
+    public static final String BOM_DESTINO = "Bom Destino";
 
     @Value("${stur-endpoint-uri:localhost:8081}")
     private String sturEndpointUri;
@@ -108,6 +111,26 @@ public class SpatialDataService {
         final var regionTaxes = RegionTaxes.builder().region(region).taxes(totalTax).build();
 
         return Optional.of(regionTaxes);
+    }
+
+    public Optional<County> getCountyData() throws RegionTaxesException {
+        final List<Taxes> taxes;
+        try {
+            taxes = sturClient.getDataFromStur();
+        } catch (ApiCallException | ParsingException e) {
+            log.error("Erro ao obter dados do STUR", e);
+            throw new RegionTaxesException(e);
+        }
+
+        if (taxes.isEmpty()) {
+            return Optional.empty();
+        }
+
+        final var totalTaxes = taxes.stream().map(Taxes::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        final var population = taxes.stream().map(tax -> RegionData.valueOf(tax.getRegionCode()).getPopulation()).reduce(0L, Long::sum);
+        final var totalRegions = RegionData.values().length;
+
+        return Optional.of(County.builder().name(BOM_DESTINO).population(population).totalTaxes(totalTaxes).totalRegions(totalRegions).build());
     }
 }
 

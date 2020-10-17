@@ -3,7 +3,6 @@ package br.com.sgm.spatialdataprocessor.endpoint.response;
 import java.math.BigDecimal;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 
 /**

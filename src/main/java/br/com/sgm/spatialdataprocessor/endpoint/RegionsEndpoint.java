@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Classe responsável por prover um endpoint para manipulação de regioẽs
+ * Classe responsável por prover um endpoint para obtenção de dados das regiões
  */
 @Slf4j
 @RestController
